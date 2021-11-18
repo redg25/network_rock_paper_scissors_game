@@ -36,7 +36,7 @@ clientFrame.pack(side=tk.BOTTOM, pady=(5, 10))
 
 
 server = None
-HOST_ADDR = "xxxx"
+HOST_ADDR = "192.168.0.75"
 HOST_PORT = 8080
 client_name = " "
 clients = []
@@ -73,8 +73,11 @@ def stop_server():
 def accept_clients(the_server, y):
     while True:
         if len(clients) < 2:
+            print('one')
             client, addr = the_server.accept()
+            print('two')
             clients.append(client)
+            print('three')
 
             # use a thread so as not to clog the gui thread
             threading._start_new_thread(send_receive_client_message, (client, addr))
@@ -89,9 +92,9 @@ def send_receive_client_message(client_connection, client_ip_addr):
     # send welcome message to client
     client_name = client_connection.recv(4096)
     if len(clients) < 2:
-        client_connection.send("welcome1")
+        client_connection.send("welcome1".encode())
     else:
-        client_connection.send("welcome2")
+        client_connection.send("welcome2".encode())
 
     clients_names.append(client_name)
     update_client_names_display(clients_names)  # update client names display
@@ -100,8 +103,10 @@ def send_receive_client_message(client_connection, client_ip_addr):
         sleep(1)
 
         # send opponent name
-        clients[0].send("opponent_name$" + clients_names[1])
-        clients[1].send("opponent_name$" + clients_names[0])
+        opponent1_msg = "opponent_name$" + clients_names[1]
+        opponent2_msg = "opponent_name$" + clients_names[0]
+        clients[0].send(opponent1_msg.encode())
+        clients[1].send(opponent2_msg.encode())
         # go to sleep
 
     while True:
@@ -121,8 +126,10 @@ def send_receive_client_message(client_connection, client_ip_addr):
 
         if len(player_data) == 2:
             # send player 1 choice to player 2 and vice versa
-            player_data[0].get("socket").send("$opponent_choice" + player_data[1].get("choice"))
-            player_data[1].get("socket").send("$opponent_choice" + player_data[0].get("choice"))
+            opponent1_choice_msg = "$opponent_choice" + player_data[1].get("choice")
+            opponent2_choice_msg = "$opponent_choice" + player_data[0].get("choice")
+            player_data[0].get("socket").send(opponent1_choice_msg.encode())
+            player_data[1].get("socket").send(opponent2_choice_msg.encode())
 
             player_data = []
 
@@ -153,7 +160,8 @@ def update_client_names_display(name_list):
     tkDisplay.delete('1.0', tk.END)
 
     for c in name_list:
-        tkDisplay.insert(tk.END, c+"\n")
+        print(c)
+        tkDisplay.insert(tk.END, c.decode()+"\n")
     tkDisplay.config(state=tk.DISABLED)
 
 

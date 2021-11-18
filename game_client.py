@@ -21,7 +21,7 @@ opponent_score = 0
 
 # network client
 client = None
-HOST_ADDR = "xxxx"
+HOST_ADDR = "192.168.0.75"
 HOST_PORT = 8080
 
 
@@ -184,6 +184,7 @@ def connect_to_server(name):
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((HOST_ADDR, HOST_PORT))
         client.send(name.encode()) # Send name to server after connecting
+        print('from client')
 
         # disable widgets
         btn_connect.config(state=tk.DISABLED)
@@ -208,15 +209,15 @@ def receive_message_from_server(sck, m):
 
         if not from_server: break
 
-        if from_server.startswith("welcome"):
-            if from_server == "welcome1":
+        if from_server.startswith("welcome".encode()):
+            if from_server == "welcome1".encode():
                 lbl_welcome["text"] = "Server says: Welcome " + your_name + "! Waiting for player 2"
-            elif from_server == "welcome2":
+            elif from_server == "welcome2".encode():
                 lbl_welcome["text"] = "Server says: Welcome " + your_name + "! Game will start soon"
             lbl_line_server.pack()
 
-        elif from_server.startswith("opponent_name$"):
-            opponent_name = from_server.replace("opponent_name$", "")
+        elif from_server.startswith("opponent_name$".encode()):
+            opponent_name = from_server.replace("opponent_name$".encode(), "")
             lbl_opponent_name["text"] = "Opponent: " + opponent_name
             top_frame.pack()
             middle_frame.pack()
@@ -226,9 +227,9 @@ def receive_message_from_server(sck, m):
             lbl_welcome.config(state=tk.DISABLED)
             lbl_line_server.config(state=tk.DISABLED)
 
-        elif from_server.startswith("$opponent_choice"):
+        elif from_server.startswith("$opponent_choice".encode()):
             # get the opponent choice from the server
-            opponent_choice = from_server.replace("$opponent_choice", "")
+            opponent_choice = from_server.replace("$opponent_choice".encode(), "")
 
             # figure out who wins in this round
             who_wins = game_logic(your_choice, opponent_choice)
